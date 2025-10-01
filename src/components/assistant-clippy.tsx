@@ -68,8 +68,22 @@ export function AssistantClippy({ context, triggerAfterChars = 20 }: AssistantCl
   }, [context, setStatus, abortOngoingRequest]);
 
   useEffect(() => {
-    agentRef.current = createDefaultAgent();
-    setProgress(0);
+    agentRef.current = createDefaultAgent({
+      model: 'Llama-3.2-1B-Instruct-q4f32_1-MLC', // default model
+      initProgressCallback: (report: unknown) => {
+        if (typeof report === 'number') {
+          setProgress(Math.round(report * 100));
+        } else if (
+          report &&
+          typeof report === 'object' &&
+          'progress' in report &&
+          typeof (report as { progress: number }).progress === 'number'
+        ) {
+          setProgress(Math.round((report as { progress: number }).progress * 100));
+        }
+        setStatus('loading');
+      },
+    });
     setStatus('loading');
     agentRef.current
       .initialize()

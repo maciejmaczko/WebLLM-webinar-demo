@@ -1,8 +1,10 @@
-import type { LLMProvider } from './types';
+import { WebLLMProvider } from './web-llm-provider';
+import type { LLMProvider, WebLLMConfig } from './types';
 import { MockLLMProvider } from '../mock/mock-llm-provider';
 
 export interface AgentOptions {
   provider?: LLMProvider;
+  config?: WebLLMConfig;
   /** Enable verbose console logging */
   verbose?: boolean;
 }
@@ -19,6 +21,11 @@ export class LLMAgent {
         console.log('LLMAgent: using custom provider');
       }
       this.provider = options.provider;
+    } else if (options.config) {
+      if (this.verbose) {
+        console.log('LLMAgent: using WebLLMProvider with config', options.config);
+      }
+      this.provider = new WebLLMProvider(options.config);
     } else {
       if (this.verbose) {
         console.log('LLMAgent: using MockLLMProvider');
@@ -68,6 +75,6 @@ export class LLMAgent {
   }
 }
 
-export function createDefaultAgent(): LLMAgent {
-  return new LLMAgent();
+export function createDefaultAgent(config?: WebLLMConfig): LLMAgent {
+  return new LLMAgent({ config });
 }
